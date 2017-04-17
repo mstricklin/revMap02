@@ -23,13 +23,11 @@ hs_err_pid*
 .gradle/
 
 # generated files
-target/
-build/
+/target/
+/build/
 
-# athe HSQLDB directory
-graph/
-# any Neo4j directory
-work/
+# the HSQLDB directory
+/graph/
 
 .idea/
 *.iml
