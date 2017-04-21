@@ -1,8 +1,8 @@
 // CLASSIFICATION NOTICE: This file is UNCLASSIFIED
-package strickli.graph;
+package strickli.graph.zzz;
 
-import strickli.XEdge;
-import strickli.XVertex;
+import strickli.xgraph.XEdge;
+import strickli.xgraph.XVertex;
 
 class YGraph implements Graph {
     public XVertex addVertex(XVertex v) {
@@ -21,11 +21,15 @@ class YGraph implements Graph {
         return null;
     }
     @Override
-    public XEdge getXEdge(Object id) {
+    public XEdge getEdge(Object id) {
         return null;
     }
     @Override
     public XEdge removeEdge(XEdge e) {
         return null;
+    }
+    @Override
+    public void dump() {
+
     }
 }

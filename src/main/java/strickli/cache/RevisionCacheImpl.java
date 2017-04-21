@@ -63,6 +63,10 @@ public class RevisionCacheImpl<K, V> implements RevCache.RevisionCache<K, V> {
         removed.addAll(revision.keySet());
         revision.clear();
     }
+    @Override
+    public V getForUpdate() {
+        return null;
+    }
 
     @Override
     public boolean isEmpty() {

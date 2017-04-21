@@ -6,26 +6,39 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import strickli.cache.ImmutableItem;
 import strickli.cache.MutableItem;
-import strickli.cache.RevCache;
+import strickli.graph.Edge;
+import strickli.graph.Vertex;
+import strickli.xgraph.XGraph;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Predicates.in;
 import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
 @Slf4j
 public class App {
     public static void main( String[] args ) {
-        log.info("Log msg");
-        RevCache rc = new RevCache();
-        RevCache.RevisionCache ri0 = rc.getCacheImmutable(Integer.class, Foo.class);
-        ri0.add(17, Foo.of(17, "seventeen"));
-        ri0.dump();
+
+        XGraph xg = XGraph.of();
+        Vertex v0 = xg.addVertex( null );
+        Vertex v1 = xg.addVertex( null );
+        xg.addEdge( null, v0, v1, "Foo" );
+
+        xg.dump();
+        log.info("");
+        xg.commit();
+        xg.dump();
+
+        Vertex v2 = xg.addVertex( null );
+        Edge e = xg.addEdge( null, v0, v2, "Sam" );
+        log.info("");
+        xg.dump();
+        log.info("");
+        xg.commit();
+        xg.dump();
 
 //        log.info("");
 //        RevCache.RevisionCache ri1 = rc.getCacheImmutable(Integer.class, VertexP.class);
@@ -40,23 +53,23 @@ public class App {
 //
 //        vp1.removeProp("aaa");
 //        ri1.dump();
-        log.info("");
-        VP vp = new VP();
-        log.info("RevisionCache {}", vp);
-        VPMutable vpm = vp.mutableCopy();
-        vpm.setProp("aaa-k", "aaa-v");
-        vpm.setProp("bbb-k", "bbb-v");
-        log.info("RevisionCacheMutable {}", vpm);
-        vpm.remove("aaa-k");
-        log.info("RevisionCacheMutable {}", vpm);
-
-        VP vp1 = vpm.mergeInto(vp);
-        ImmutableItem<VP> vp2 = vpm.merge(vp);
-
-
-        log.info("Merged {}", vp1);
-        List<ImmutableItem<?>> l = newArrayList();
-        l.add(vp1);
+//        log.info("");
+//        VP vp = new VP();
+//        log.info("RevisionCache {}", vp);
+//        VPMutable vpm = vp.mutableCopy();
+//        vpm.setProp("aaa-k", "aaa-v");
+//        vpm.setProp("bbb-k", "bbb-v");
+//        log.info("RevisionCacheMutable {}", vpm);
+//        vpm.remove("aaa-k");
+//        log.info("RevisionCacheMutable {}", vpm);
+//
+//        VP vp1 = vpm.mergeInto(vp);
+//        ImmutableItem<VP> vp2 = vpm.merge(vp);
+//
+//
+//        log.info("Merged {}", vp1);
+//        List<ImmutableItem<?>> l = newArrayList();
+//        l.add(vp1);
 //        vpm.dump();
     }
     // =================================

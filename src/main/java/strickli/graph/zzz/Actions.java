@@ -1,14 +1,15 @@
 // CLASSIFICATION NOTICE: This file is UNCLASSIFIED
-package strickli.graph;
+package strickli.graph.zzz;
 
-import com.google.common.base.Function;
-import strickli.XEdge;
-import strickli.XVertex;
+import lombok.ToString;
+import strickli.xgraph.XEdge;
+import strickli.xgraph.XVertex;
 
 public class Actions {
+    @ToString
     abstract static class Action {
-        abstract void apply(Graph g);
-        abstract void undo(Graph g);
+        abstract Action apply(Graph g);
+        abstract Action undo(Graph g);
         public boolean equals(Object object) {
             return false;
         }
@@ -17,12 +18,14 @@ public class Actions {
     public static Action addVertex(final XVertex v) {
         return new Action() {
             @Override
-            public void apply(final Graph g) {
+            public Action apply(final Graph g) {
                 g.addVertex(v);
+                return this;
             }
             @Override
-            public void undo(Graph g) {
+            public Action undo(Graph g) {
                 g.removeVertex(v);
+                return this;
             }
         };
     }
@@ -30,13 +33,14 @@ public class Actions {
     public static Action removeVertex(final XVertex v) {
         return new Action() {
             @Override
-            public void apply(final Graph g) {
+            public Action apply(final Graph g) {
                 g.removeVertex(v);
+                return this;
             }
             @Override
-            void undo(Graph g) {
+            Action undo(Graph g) {
                 g.addVertex(v);
-
+                return this;
             }
         };
     }
@@ -44,12 +48,15 @@ public class Actions {
     public static Action addEdge(final XEdge e) {
         return new Action() {
             @Override
-            public void apply(final Graph g) {
+            public Action apply(final Graph g) {
+                // check vertices exist
                 g.addEdge(e);
+                return this;
             }
             @Override
-            void undo(Graph g) {
+            Action undo(Graph g) {
                 g.removeEdge(e);
+                return this;
             }
         };
     }
@@ -57,12 +64,15 @@ public class Actions {
     public static Action removeEdge(final XEdge e) {
         return new Action() {
             @Override
-            public void apply(final Graph g) {
+            public Action apply(final Graph g) {
                 g.removeEdge(e);
+                return this;
             }
             @Override
-            void undo(Graph g) {
+            Action undo(Graph g) {
+                // check vertices exist
                 g.addEdge(e);
+                return this;
             }
         };
     }

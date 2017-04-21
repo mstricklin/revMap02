@@ -1,16 +1,14 @@
 // CLASSIFICATION NOTICE: This file is UNCLASSIFIED
 package strickli.graph;
 
-import strickli.XEdge;
-import strickli.XVertex;
-
-
 public interface Graph {
+    Vertex addVertex(Object id);
+    Vertex getVertex(Object id);
+    void removeVertex(Vertex v);
 
-    XVertex addVertex(XVertex v);
-    XVertex getVertex(Object id);
-    XVertex removeVertex(XVertex v);
-    XEdge addEdge(XEdge e);
-    XEdge getXEdge(Object id);
-    XEdge removeEdge(XEdge e);
+    Edge addEdge(Object id, Vertex outVertex, Vertex inVertex, String label);
+    Edge getEdge(Object id);
+    void removeEdge(Edge v);
+
+    void dump();
 }

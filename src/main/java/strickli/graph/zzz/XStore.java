@@ -1,8 +1,8 @@
 // CLASSIFICATION NOTICE: This file is UNCLASSIFIED
-package strickli.graph;
+package strickli.graph.zzz;
 
-import strickli.XEdge;
-import strickli.XVertex;
+import strickli.xgraph.XEdge;
+import strickli.xgraph.XVertex;
 
 public interface XStore {
     void addVertex(Long id, XVertex v);

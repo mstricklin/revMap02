@@ -21,16 +21,16 @@ public class GraphCache {
     public RevMap.Revision getRevision(TypePair<?,?> cacheKey) {
         Cache caches =  revisions.get();
         final RevMap rm = null;
-        try {
-            RevMap.Revision rmr = caches.get(cacheKey, new Callable<RevMap.Revision>() {
-                @Override
-                public RevMap.Revision call() throws Exception {
-                    return rm.getRevision();
-                }
-            });
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            RevMap.Revision rmr = caches.get(cacheKey, new Callable<RevMap.Revision>() {
+//                @Override
+//                public RevMap.Revision call() throws Exception {
+//                    return rm.getRevision();
+//                }
+//            });
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
         return rm.getRevision();
     }
     // =================================
