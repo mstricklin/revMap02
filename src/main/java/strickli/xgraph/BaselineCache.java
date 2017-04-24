@@ -12,25 +12,26 @@ public class BaselineCache implements XStore {
     // TODO: add read-through
 
     @Override
-    public void addVertex(Long id, XVertex v) {
+    public void addVertex(XVertex v) {
         vertices.put( v.getRawId(), v );
     }
+
     @Override
     public XVertex getVertex(Long id) {
         // TODO: read-through to SoR
         return vertices.get( id );
     }
     @Override
-    public void removeVertex(Long id) {
-        vertices.remove( id );
+    public void removeVertex(XVertex v) {
+        vertices.remove( v.getRawId() );
     }
     @Override
-    public void addEdge(Long id, XEdge e) {
-        XVertex outVertex = getVertex( e.getOutID() );
+    public void addEdge(XEdge e) {
+        XVertex outVertex = getVertex( e.getOutVertexID() );
         outVertex.addOutEdge( e );
-        XVertex inVertex = getVertex( e.getInID() );
+        XVertex inVertex = getVertex( e.getInVertexID() );
         inVertex.addInEdge( e );
-        edges.put( id, e );
+        edges.put( e.getRawId(), e );
     }
     @Override
     public XEdge getEdge(Long id) {
@@ -38,8 +39,12 @@ public class BaselineCache implements XStore {
         return edges.get( id );
     }
     @Override
-    public void removeEdge(Long id) {
-        edges.remove( id );
+    public void removeEdge(XEdge e) {
+        XVertex outVertex = getVertex( e.getOutVertexID() );
+        outVertex.rmEdge( e );
+        XVertex inVertex = getVertex( e.getInVertexID() );
+        inVertex.rmEdge( e );
+        edges.remove( e.getRawId() );
     }
     @Override
     public void dump() {

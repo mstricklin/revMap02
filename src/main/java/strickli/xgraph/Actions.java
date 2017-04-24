@@ -22,7 +22,7 @@ public class Actions {
             }
             @Override
             public Action undo(final XStore s) {
-                s.removeVertex(v.getRawId());
+                s.removeVertex(v);
                 return this;
             }
         };
@@ -32,7 +32,7 @@ public class Actions {
         return new Action() {
             @Override
             public Action apply(final XStore s) {
-                s.removeVertex(v.getRawId());
+                s.removeVertex(v);
                 return this;
             }
             @Override
@@ -43,32 +43,16 @@ public class Actions {
         };
     }
     // =================================
-    public static Action addOutEdge(final XVertex v, final XEdge e) {
-        return new Action() {
-            @Override
-            public Action apply(final XStore s) {
-                s.addOutEdge(v, e);
-                return this;
-            }
-            @Override
-            public Action undo(final XStore s) {
-                s.rmOutEdge( v, e);
-                return this;
-            }
-        };
-    }
-    // =================================
     public static Action addEdge(final XEdge e) {
         return new Action() {
             @Override
             public Action apply(final XStore s) {
-                // check vertices exist
                 s.addEdge(e);
                 return this;
             }
             @Override
             Action undo(final XStore s) {
-                s.removeEdge(e.getRawId());
+                s.removeEdge(e);
                 return this;
             }
         };
@@ -78,7 +62,7 @@ public class Actions {
         return new Action() {
             @Override
             public Action apply(final XStore s) {
-                s.removeEdge(e.getRawId());
+                s.removeEdge(e);
                 return this;
             }
             @Override

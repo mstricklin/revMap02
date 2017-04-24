@@ -40,28 +40,16 @@ public class RevisionCache implements XStore {
         return v;
     }
     @Override
-    public void removeVertex(Long id) {
-        // TODO: remove dependent edges...
-        removedVertices.add( id );
-        revisedVertices.remove( id );
-    }
-    @Override
-    public void addOutEdge(final XVertex v, final XEdge e) {
-        XVertex vm = getMutableVertex(v.getRawId());
-        vm.addOutEdge( e );
-    }
-    @Override
-    public void rmOutEdge(final XVertex v, final XEdge e) {
-        XVertex vm = getMutableVertex(v.getRawId());
-        vm.rmOutEdge( e );
+    public void removeVertex(XVertex v) {
+        removedVertices.add( v.getRawId() );
+        revisedVertices.remove( v.getRawId() );
     }
     @Override
     public void addEdge(XEdge e) {
-        XVertex outVertex = getMutableVertex( e.getOutID() );
+        XVertex outVertex = getMutableVertex( e.getOutVertexID() );
         outVertex.addOutEdge( e );
-        XVertex inVertex = getMutableVertex( e.getInID() );
+        XVertex inVertex = getMutableVertex( e.getInVertexID() );
         inVertex.addInEdge( e );
-
         revisedEdges.put(e.getRawId(), e);
     }
     @Override
@@ -82,9 +70,14 @@ public class RevisionCache implements XStore {
         return (e != null) ? e.copy() : null;
     }
     @Override
-    public void removeEdge(Long id) {
-        removedEdges.add( id );
-        revisedEdges.remove( id );
+    public void removeEdge(XEdge e) {
+        XVertex outVertex = getVertex( e.getOutVertexID() ); // test for null...
+        outVertex.rmEdge( e );
+        XVertex inVertex = getVertex( e.getInVertexID() ); // test for null...
+        inVertex.rmEdge( e );
+
+        removedEdges.add( e.getRawId() );
+        revisedEdges.remove( e.getRawId() );
     }
     public void dump() {
         if (!log.isInfoEnabled())
@@ -96,7 +89,7 @@ public class RevisionCache implements XStore {
                 log.info("\t {} => {}", e.getKey(), e.getValue());
         }
         if (!removedVertices.isEmpty())
-            log.info("\tRemoved {}", removedVertices);
+            log.info("\tRemoved vertices {}", removedVertices);
 
         if (!revisedEdges.isEmpty()) {
             log.info( "\t= edges =" );
@@ -104,7 +97,7 @@ public class RevisionCache implements XStore {
                 log.info("\t {} => {}", e.getKey(), e.getValue());
         }
         if (!removedEdges.isEmpty())
-            log.info("\tRemoved {}", removedEdges);
+            log.info("\tRemoved edges {}", removedEdges);
         if (revisedVertices.isEmpty() && removedVertices.isEmpty()
                 && revisedEdges.isEmpty() && removedEdges.isEmpty())
             log.info("\tempty");

@@ -32,9 +32,18 @@ public class App {
         xg.commit();
         xg.dump();
 
+        log.info("=====");
         Vertex v2 = xg.addVertex( null );
         Edge e = xg.addEdge( null, v0, v2, "Sam" );
+        xg.dump();
         log.info("");
+        xg.commit();
+        xg.dump();
+
+        log.info("=====");
+        Vertex v0a = xg.getVertex( 0l );
+        log.info("Got vertex 0: {}", v0a);
+        xg.removeVertex( v0a );
         xg.dump();
         log.info("");
         xg.commit();
