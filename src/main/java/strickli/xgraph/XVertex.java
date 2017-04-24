@@ -10,16 +10,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.FluentIterable;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import strickli.CovariantIterable;
 import strickli.graph.*;
 
+// XVertex needs a 'XGraph' for self-remove, which calls XGraph.remove
+// XVertex needs a 'id' for lookup of Impl
+//
+
 @Slf4j
 @ToString
 public class XVertex implements Vertex, Copyable<XVertex> {
-    // TODO: make this a proxy, all operations happen on an inner class
     public static XVertex of(XGraph g, long id) {
         return new XVertex(g, id);
     }
@@ -31,45 +33,27 @@ public class XVertex implements Vertex, Copyable<XVertex> {
         return id;
     }
     void addOutEdge(XEdge e) {
-        outEdges.add( e.getRawId() );
+        impl().outEdges.add( e.getRawId() );
     }
     void addInEdge(XEdge e) {
-        inEdges.add( e.getRawId() );
+        impl().inEdges.add( e.getRawId() );
     }
     void rmEdge(XEdge e) {
-        outEdges.remove( e.getRawId() );
-        inEdges.remove( e.getRawId() );
+        Mutable vi = impl();
+        vi.outEdges.remove( e.getRawId() );
+        vi.inEdges.remove( e.getRawId() );
     }
-    public Iterable<XEdge> getEdges() {
-        log.info("getEdges {}", this);
-        return newArrayList(transform(concat(inEdges, outEdges), graph.makeEdge));
-    }
-
     @Override
-    public Iterable<Edge> getEdges(String... labels) {
-        log.info("getEdges generic {}", this);
-        List<XEdge> al = newArrayList( transform( concat( inEdges, outEdges), graph.makeEdge));
+    public Iterable<Edge> getEdges(Direction direction, String... labels) {
+        // TODO: direction
+        log.info("getEdges {}", this);
+        Mutable vi = impl();
+        List<XEdge> al = newArrayList( transform( concat( vi.inEdges, vi.outEdges), graph.makeEdge));
         CovariantIterable<Edge> ci = CovariantIterable.of(al);
         return ci;
     }
     @Override
-    public Iterable<Vertex> getVertices(String... labels) {
-        return Collections.emptyList();
-    }
-    @Override
-    public Iterable<Edge> getOutEdges(String... labels) {
-        return Collections.emptyList();
-    }
-    @Override
-    public Iterable<Edge> getInEdges(String... labels) {
-        return Collections.emptyList();
-    }
-    @Override
-    public Iterable<Vertex> getOutVertices(String... labels) {
-        return Collections.emptyList();
-    }
-    @Override
-    public Iterable<Vertex> getInVertices(String... labels) {
+    public Iterable<Vertex> getVertices(Direction direction, String... labels) {
         return Collections.emptyList();
     }
     @Override
@@ -84,18 +68,43 @@ public class XVertex implements Vertex, Copyable<XVertex> {
     private XVertex(XGraph g, long id) {
         graph = g;
         this.id = id;
-        inEdges = newHashSet();
-        outEdges = newHashSet();
     }
     private XVertex(XVertex v) {
         graph = v.graph;
         id = v.id;
-        inEdges = newHashSet(v.inEdges);
-        outEdges = newHashSet(v.outEdges);
+    }
+    private Mutable impl() {
+        return graph.getVertexImpl( id );
     }
     // =================================
     private final XGraph graph;
     private final long id;
-    private final Set<Long> inEdges;
-    private final Set<Long> outEdges;
+
+    // =================================
+    static class Mutable {
+        public static Mutable of(long id) {
+            return new Mutable( id );
+        }
+        public static Mutable of(XVertex v) {
+            return new Mutable( v.id );
+        }
+
+        public Mutable copy() {
+            return new Mutable( this );
+        }
+        private Mutable(long id) {
+            this.id = id;
+            inEdges = newHashSet();
+            outEdges = newHashSet();
+        }
+        private Mutable(Mutable v) {
+            this.id = v.id;
+            inEdges = newHashSet(v.inEdges);
+            outEdges = newHashSet(v.outEdges);
+        }
+        // =================================
+        protected final long id;
+        private final Set<Long> inEdges;
+        private final Set<Long> outEdges;
+    }
 }

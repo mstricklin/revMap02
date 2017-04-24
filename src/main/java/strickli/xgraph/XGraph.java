@@ -9,12 +9,11 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.base.Function;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import strickli.graph.*;
 
 @Slf4j
-public class XGraph implements Graph {
+public class XGraph implements Graph, TransactionalGraph {
     private static AtomicLong EDGE_ID = new AtomicLong( 0L );
     private static AtomicLong VERTEX_ID = new AtomicLong( 0L );
 
@@ -59,17 +58,21 @@ public class XGraph implements Graph {
         }
         return null;
     }
+    public XVertex.Mutable getVertexImpl(Long id) {
+        log.trace( "getVertexImpl {}", id );
+        return rc().getVertexImpl( id );
+    }
     @Override
     public void removeVertex(Vertex v) {
         log.trace( "removeVertex {}", v );
         checkNotNull( v );
-        for (Edge e: v.getEdges()) {
-            log.trace("remove edge {}", e);
+        for (Edge e : v.getEdges( Direction.BOTH )) {
+            log.trace( "remove edge {}", e );
             removeEdge( e );
         }
         applyAndQueue( Actions.removeVertex( (XVertex)v ) );
     }
-//    Iterable<Vertex> getVertices();
+    //    Iterable<Vertex> getVertices();
 //    Iterable<Vertex> getVertices(String key, Object val);
     @Override
     public Edge addEdge(Object id, Vertex outVertex, Vertex inVertex, String label) {
@@ -113,6 +116,10 @@ public class XGraph implements Graph {
         tx.get().dump();
         baseline.dump();
     }
+    @Override
+    public void shutdown() {
+
+    }
     // =================================
     public void commit() { // TODO: throw
         Deque<Actions.Action> undo = newArrayDeque();
@@ -125,6 +132,11 @@ public class XGraph implements Graph {
         }
         tw.reset();
     }
+    @Override
+    public void rollback() {
+
+    }
+    // =================================
     public String toString() {
         return Integer.toString( hashCode() );
     }
@@ -136,21 +148,21 @@ public class XGraph implements Graph {
     private RevisionCache rc() {
         return tx.get().rc;
     }
-//    private TransactionWork tx() {
+    //    private TransactionWork tx() {
 //        return tx.get();
 //    }
     private ThreadLocal<TransactionWork> tx = new ThreadLocal<TransactionWork>() {
         @Override
         protected TransactionWork initialValue() {
-            return new TransactionWork( baseline );
+            return new TransactionWork( XGraph.this, baseline );
         }
     };
 
     private static class TransactionWork {
         private final RevisionCache rc;
         private final Queue<Actions.Action> actions = newArrayDeque();
-        TransactionWork(BaselineCache baseline) {
-            rc = new RevisionCache( baseline );
+        TransactionWork(XGraph g, BaselineCache baseline) {
+            rc = new RevisionCache( g, baseline );
         }
         private Actions.Action addAction(Actions.Action a) {
             actions.add( a );
@@ -172,5 +184,5 @@ public class XGraph implements Graph {
     }
 
 
-    private final BaselineCache baseline = new BaselineCache();
+    private final BaselineCache baseline = new BaselineCache( this );
 }

@@ -9,20 +9,26 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class BaselineCache implements XStore {
+    BaselineCache(XGraph g) {
+        graph = g;
+    }
     // TODO: add read-through
 
     @Override
     public void addVertex(XVertex v) {
         vertices.put( v.getRawId(), v );
+        verticesImpl.put(v.getRawId(), XVertex.Mutable.of(v.getRawId()));
     }
 
     @Override
     public XVertex getVertex(Long id) {
         // TODO: read-through to SoR
-        return vertices.get( id );
+        XVertex.Mutable vm = verticesImpl.get( id );
+        return (vm == null) ? null : XVertex.of( graph, id );
     }
     @Override
     public void removeVertex(XVertex v) {
+        verticesImpl.remove( v.getRawId() );
         vertices.remove( v.getRawId() );
     }
     @Override
@@ -66,6 +72,8 @@ public class BaselineCache implements XStore {
             log.info("\tempty");
     }
     // =================================
+    private final XGraph graph;
     private final Map<Long, XVertex> vertices = newHashMap();
+    private final Map<Long, XVertex.Mutable> verticesImpl = newHashMap();
     private final Map<Long, XEdge> edges = newHashMap();
 }

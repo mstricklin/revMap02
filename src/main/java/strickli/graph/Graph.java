@@ -11,4 +11,7 @@ public interface Graph {
     void removeEdge(Edge v);
 
     void dump();
+
+    public void shutdown();
+
 }
