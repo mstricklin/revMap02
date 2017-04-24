@@ -3,14 +3,10 @@ package strickli.graph;
 
 public interface Vertex {
 
-    Iterable<Edge> getEdges(String... labels);
-    Iterable<Vertex> getVertices(String... labels);
+    Iterable<Edge> getEdges(Direction direction, String... labels);
+    Iterable<Vertex> getVertices(Direction direction, String... labels);
 
-    Iterable<Edge> getOutEdges(String... labels);
-    Iterable<Edge> getInEdges(String... labels);
-
-    Iterable<Vertex> getOutVertices(String... labels);
-    Iterable<Vertex> getInVertices(String... labels);
+    // VertexQuery query();
 
     Edge addEdge(String label, Vertex inVertex);
 }
