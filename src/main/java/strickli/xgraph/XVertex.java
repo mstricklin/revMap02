@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import strickli.CovariantIterable;
@@ -101,6 +102,15 @@ public class XVertex implements Vertex, Copyable<XVertex> {
             this.id = v.id;
             inEdges = newHashSet(v.inEdges);
             outEdges = newHashSet(v.outEdges);
+        }
+        @Override
+        public int hashCode() {
+            return (int)id;
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof Mutable)) return false;
+            return false;
         }
         // =================================
         protected final long id;
