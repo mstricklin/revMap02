@@ -53,7 +53,7 @@ public class GraphCache {
 //        Revisions();
     }
 
-//    Cache<TypePair<?,?>, RevMap> cache = CacheBuilder.newBuilder()
+//    XCache<TypePair<?,?>, RevMap> cache = CacheBuilder.newBuilder()
 //            .maximumSize(1000)
 //            .build();
 

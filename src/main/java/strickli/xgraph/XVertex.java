@@ -10,21 +10,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import strickli.CovariantIterable;
 import strickli.graph.*;
 
 // XVertex needs a 'XGraph' for self-remove, which calls XGraph.remove
-// XVertex needs a 'id' for lookup of Impl
-//
+// XVertex needs a 'id' for lookup of RawVertex
+// RawVertex needs id for hashCode and equals
 
 @Slf4j
 @ToString
 public class XVertex extends XElement implements Vertex, Copyable<XVertex> {
     public static XVertex of(XGraph g, long id) {
-        return new XVertex(g, id);
+        XVertex v = new XVertex(g, id);
+        if (null == v.impl()) {
+            g.addVertexImpl( id, RawVertex.of( id ) );
+        }
+        return v;
     }
     // =================================
     void addOutEdge(XEdge e) {
@@ -34,7 +37,7 @@ public class XVertex extends XElement implements Vertex, Copyable<XVertex> {
         impl().inEdges.add( e.getRawId() );
     }
     void rmEdge(XEdge e) {
-        Mutable vi = impl();
+        RawVertex vi = impl();
         vi.outEdges.remove( e.getRawId() );
         vi.inEdges.remove( e.getRawId() );
     }
@@ -42,7 +45,8 @@ public class XVertex extends XElement implements Vertex, Copyable<XVertex> {
     public Iterable<Edge> getEdges(Direction direction, String... labels) {
         // TODO: direction
         log.info("getEdges {}", this);
-        Mutable vi = impl();
+        RawVertex vi = impl();
+        // TODO: check vi validity
         List<XEdge> al = newArrayList( transform( concat( vi.inEdges, vi.outEdges), graph.makeEdge));
         CovariantIterable<Edge> ci = CovariantIterable.of(al);
         return ci;
@@ -53,7 +57,7 @@ public class XVertex extends XElement implements Vertex, Copyable<XVertex> {
     }
     @Override
     public Edge addEdge(String label, Vertex inVertex) {
-        return null;
+        return graph.addEdge( null, this, inVertex, label );
     }
     @Override
     public String toString() {
@@ -61,51 +65,47 @@ public class XVertex extends XElement implements Vertex, Copyable<XVertex> {
     }
     @Override
     public XVertex copy() {
+        // TODO: copy RawVertex to revision cache?
         return new XVertex(this);
+    }
+    @Override
+    public void remove() {
+        graph.removeVertex( this );
     }
     // =================================
     private XVertex(XGraph g, long id) {
         super(g, id);
     }
+
     private XVertex(XVertex v) {
         super(v.graph, v.id);
     }
-    private Mutable impl() {
+    private RawVertex impl() {
         return graph.getVertexImpl( id );
     }
     // =================================
-    static class Mutable {
-        public static Mutable of(long id) {
-            return new Mutable( id );
+    static class RawVertex extends RawElement {
+        public static RawVertex of(long id) {
+            return new RawVertex( id );
         }
-        public static Mutable of(XVertex v) {
-            return new Mutable( v.id );
+        public static RawVertex of(XVertex v) {
+            return new RawVertex( v.id );
         }
 
-        public Mutable copy() {
-            return new Mutable( this );
+        public RawVertex copy() {
+            return new RawVertex( this );
         }
-        private Mutable(long id) {
-            this.id = id;
+        private RawVertex(long id) {
+            super(id);
             inEdges = newHashSet();
             outEdges = newHashSet();
         }
-        private Mutable(Mutable v) {
-            this.id = v.id;
-            inEdges = newHashSet(v.inEdges);
-            outEdges = newHashSet(v.outEdges);
-        }
-        @Override
-        public int hashCode() {
-            return (int)id;
-        }
-        @Override
-        public boolean equals(Object o) {
-            if (!(o instanceof Mutable)) return false;
-            return false;
+        private RawVertex(RawVertex other) {
+            super(other);
+            inEdges = newHashSet(other.inEdges);
+            outEdges = newHashSet(other.outEdges);
         }
         // =================================
-        protected final long id;
         private final Set<Long> inEdges;
         private final Set<Long> outEdges;
     }

@@ -3,7 +3,7 @@ package strickli.xgraph;
 
 public interface XStore {
     void addVertex(XVertex v);
-    XVertex.Mutable getVertex(Long id);
+    XVertex.RawVertex getVertex(Long id);
     void removeVertex(XVertex v);
 
 //    void addOutEdge(XVertex v, XEdge e);

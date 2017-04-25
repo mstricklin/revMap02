@@ -3,6 +3,7 @@ package strickli.xgraph;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Queues.newArrayDeque;
+import static strickli.xgraph.RevCache.newRevCache;
 
 import java.util.Deque;
 import java.util.Queue;
@@ -41,10 +42,17 @@ public class XGraph implements Graph, TransactionalGraph {
 
     public Vertex addVertex(Object id) {
         // TODO: prime ID counter
-        XVertex v = XVertex.of( this, VERTEX_ID.getAndIncrement() );
+        long vID = VERTEX_ID.getAndIncrement();
+        XVertex.RawVertex rv = XVertex.RawVertex.of( vID );
+        XVertex v = XVertex.of( this, vID );
         log.trace( "addVertex {}", v );
         applyAndQueue( Actions.addVertex( v ) );
-        return v;
+
+//        applyAndQueue( Actions.addVertexImpl( vID, rv ) );
+
+        tx2.get().applyAndQueue( Actions.addVertexImpl( vID, rv ) );
+
+        return XVertex.of( this, vID );
     }
     @Override
     public Vertex getVertex(Object id) {
@@ -58,10 +66,10 @@ public class XGraph implements Graph, TransactionalGraph {
         }
         return null;
     }
-    public XVertex.Mutable getVertexImpl(Long id) {
-        log.trace( "getVertexImpl {}", id );
-        return rc().getVertexImpl( id );
-    }
+//    public XVertex.RawVertex getVertexImpl(Long id) {
+//        log.trace( "getVertexImpl {}", id );
+//        return rc().getVertexImpl( id );
+//    }
     @Override
     public void removeVertex(Vertex v) {
         log.trace( "removeVertex {}", v );
@@ -182,7 +190,27 @@ public class XGraph implements Graph, TransactionalGraph {
             actions.clear();
         }
     }
+    // =================================
+    private ThreadLocal<TransactionWork2> tx2 = new ThreadLocal<TransactionWork2>() {
+        @Override
+        protected TransactionWork2 initialValue() {
+            return new TransactionWork2( XGraph.this );
+        }
+    };
+    private static class TransactionWork2 {
+        private final XCache<XVertex.RawVertex> vRevision;
+        private final Queue<Actions.Action2> actions = newArrayDeque();
+        TransactionWork2(XGraph g) {
+            vRevision = g.vBaseline.getRevision();
+        }
+        private Actions.Action2 applyAndQueue(Actions.Action2 a) {
+            actions.add( a.apply( vRevision ) );
+            return a;
+        }
+    }
 
 
     private final BaselineCache baseline = new BaselineCache( this );
+
+    private final RevCache<XVertex.RawVertex> vBaseline = newRevCache();
 }

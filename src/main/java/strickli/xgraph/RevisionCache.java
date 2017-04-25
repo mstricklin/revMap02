@@ -17,7 +17,7 @@ public class RevisionCache implements XStore {
     }
     @Override
     public void addVertex(XVertex v) {
-        revisedVertices2.put( v.getRawId(), XVertex.Mutable.of( v ) );
+        revisedVertices2.put( v.getRawId(), XVertex.RawVertex.of( v ) );
         revisedVertices.put( v.getRawId(), v );
     }
     @Override
@@ -25,7 +25,7 @@ public class RevisionCache implements XStore {
         if (removedVertices2.contains( id ))
             return null;
 
-        XVertex.Mutable vm = revisedVertices2.get( id );
+        XVertex.RawVertex vm = revisedVertices2.get( id );
         return (null != vm) ? XVertex.of( graph, id )
                             : baseline.getVertex( id );
 //        if (null != vm)
@@ -40,7 +40,7 @@ public class RevisionCache implements XStore {
     public XVertex getMutableVertex(Long id) {
         if (removedVertices.contains( id ))
             return null;
-        XVertex.Mutable vm = revisedVertices2.get( id );
+        XVertex.RawVertex vm = revisedVertices2.get( id );
         if (null != vm)
             return XVertex.of( graph, id );
         XVertex v = baseline.getVertex( id );
@@ -66,7 +66,7 @@ public class RevisionCache implements XStore {
         removedVertices.add( v.getRawId() );
         revisedVertices.remove( v.getRawId() );
     }
-    public void removeVertex(XVertex.Mutable v) {
+    public void removeVertex(XVertex.RawVertex v) {
         removedVertices2.add( v.id );
         revisedVertices2.remove( v.id );
     }
@@ -139,7 +139,7 @@ public class RevisionCache implements XStore {
     private final Map<Long, XVertex> revisedVertices = newHashMap();
     private final Set<Long> removedVertices = newHashSet();
 
-    private final Map<Long, XVertex.Mutable> revisedVertices2 = newHashMap();
+    private final Map<Long, XVertex.RawVertex> revisedVertices2 = newHashMap();
     private final Set<Long> removedVertices2 = newHashSet();
 
     private final Map<Long, XEdge> revisedEdges = newHashMap();

@@ -12,6 +12,14 @@ public class Actions {
             return false;
         }
     }
+    @ToString
+    abstract static class Action2 {
+        abstract Action2 apply(XCache c);
+        abstract Action2 undo(XCache c);
+        public boolean equals(Object object) {
+            return false;
+        }
+    }
     // =================================
     public static Action addVertex(final XVertex v) {
         return new Action() {
@@ -23,6 +31,21 @@ public class Actions {
             @Override
             public Action undo(final XStore s) {
                 s.removeVertex(v);
+                return this;
+            }
+        };
+    }
+    // =================================
+    public static Action2 addVertexImpl(final long id, final XVertex.RawVertex rv) {
+        return new Action2() {
+            @Override
+            public Action2 apply(final XCache c) {
+                c.add(id, rv);
+                return this;
+            }
+            @Override
+            public Action2 undo(final XCache c) {
+                c.remove(id);
                 return this;
             }
         };
