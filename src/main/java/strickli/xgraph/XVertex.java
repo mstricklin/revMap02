@@ -21,17 +21,11 @@ import strickli.graph.*;
 
 @Slf4j
 @ToString
-public class XVertex implements Vertex, Copyable<XVertex> {
+public class XVertex extends XElement implements Vertex, Copyable<XVertex> {
     public static XVertex of(XGraph g, long id) {
         return new XVertex(g, id);
     }
     // =================================
-    public Object getId() {
-        return id;
-    }
-    public long getRawId() {
-        return id;
-    }
     void addOutEdge(XEdge e) {
         impl().outEdges.add( e.getRawId() );
     }
@@ -61,25 +55,23 @@ public class XVertex implements Vertex, Copyable<XVertex> {
         return null;
     }
     @Override
+    public String toString() {
+        return "V[" + id + "]";
+    }
+    @Override
     public XVertex copy() {
         return new XVertex(this);
     }
     // =================================
     private XVertex(XGraph g, long id) {
-        graph = g;
-        this.id = id;
+        super(g, id);
     }
     private XVertex(XVertex v) {
-        graph = v.graph;
-        id = v.id;
+        super(v.graph, v.id);
     }
     private Mutable impl() {
         return graph.getVertexImpl( id );
     }
-    // =================================
-    private final XGraph graph;
-    private final long id;
-
     // =================================
     static class Mutable {
         public static Mutable of(long id) {

@@ -6,6 +6,17 @@ import java.util.Set;
 import strickli.graph.Element;
 
 public abstract class XElement implements Element {
+    public XElement(XGraph graph, long id) {
+        this.graph = graph;
+        this.id = id;
+    }
+    @Override
+    public Object getId() {
+        return id;
+    }
+    public long getRawId() {
+        return id;
+    }
     @Override
     public <T> T getProperty(String key) {
         return null;
@@ -26,8 +37,8 @@ public abstract class XElement implements Element {
     public void remove() {
 
     }
-    @Override
-    public Object getId() {
-        return null;
-    }
+    // =================================
+    protected final long id;
+    protected final XGraph graph;
+
 }
